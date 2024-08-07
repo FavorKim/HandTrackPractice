@@ -13,32 +13,76 @@ public class HandTrackingGrab : MonoBehaviour
     public InputActionReference leftGrapInput;
 
     private bool rightIsGrabbing = false;
+    private bool RightIsGrabbing
+    {
+        get { return rightIsGrabbing; }
+        set
+        {
+            if (rightIsGrabbing != value)
+            {
+                rightIsGrabbing = value;
+
+                if (value == true)
+                {
+                    Debug.Log("right is grabbing");
+                }
+                else
+                {
+                    Debug.Log("right is release");
+                }
+            }
+        }
+    }
+
     private bool leftIsGrabbing = false;
+    private bool LeftIsGrabbing
+    {
+        get { return leftIsGrabbing; }
+        set
+        {
+            if (leftIsGrabbing != value)
+            {
+                leftIsGrabbing = value;
+                if (value == true)
+                {
+                    Debug.Log("left is grabbing");
+                }
+                else
+                {
+                    Debug.Log("left is release");
+                }
+            }
+        }
+    }
 
 
     [SerializeField] private float moveSpeed = 0.01f;
 
     private void OnEnable()
     {
-        leftGrapInput.action.performed += context => { leftIsGrabbing = true; };
-        leftGrapInput.action.canceled += context => { leftIsGrabbing = false; };
+        leftGrapInput.action.performed += OnGrabObject_Left;
+        leftGrapInput.action.canceled += OnReleaseObject_Left;
 
-        rightGrapInput.action.performed += context => { rightIsGrabbing = true; };
-        rightGrapInput.action.canceled += context => { rightIsGrabbing = false; };
+        rightGrapInput.action.performed += OnGrabObject_Right;
+        rightGrapInput.action.canceled += OnReleaseObject_Right;
 
         rightGrapInput.action.Enable();
         leftGrapInput.action.Enable();
     }
 
 
+
     void Update()
     {
-        SimulateHandMovement(leftHand, KeyCode.W, KeyCode.S, KeyCode.A, KeyCode.D, leftIsGrabbing, leftGrabbedObject, true);
-        SimulateHandMovement(rightHand, KeyCode.UpArrow, KeyCode.DownArrow, KeyCode.LeftArrow, KeyCode.RightArrow, rightIsGrabbing, rightGrabbedObject, false);
+        MoveHand(leftHand, KeyCode.W, KeyCode.S, KeyCode.A, KeyCode.D);
+        MoveHand(rightHand, KeyCode.UpArrow, KeyCode.DownArrow, KeyCode.LeftArrow, KeyCode.RightArrow);
+        MoveGrabbableObject();
+        
+
     }
 
 
-    private void SimulateHandMovement(OVRHand hand, KeyCode up, KeyCode down, KeyCode left, KeyCode right, bool isGrabbing, OVRGrabbable grabObj, bool isLeft)
+    private void MoveHand(OVRHand hand, KeyCode up, KeyCode down, KeyCode left, KeyCode right)
     {
         Vector3 movement = Vector3.zero;
 
@@ -61,34 +105,83 @@ public class HandTrackingGrab : MonoBehaviour
 
         hand.transform.Translate(movement * moveSpeed * Time.deltaTime);
 
+        /*
         if (isGrabbing)
         {
-            if (grabObj == null)
-            {
-                TryGrab(hand, grabObj);
-            }
+            //if (grabObj == null)
+            //{
+            //    TryGrab(hand, grabObj);
+            //}
 
             Debug.Log(hand.name + " is grabbing.");
         }
         else
         {
             // 여기서 Release 동작을 호출
-            Release(isLeft);
+            //Release(isLeft);
             Debug.Log(hand.name + " is releasing.");
+        }
+        */
+    }
+
+    private void OnGrabObject_Left(InputAction.CallbackContext con)
+    {
+        TryGrab(leftHand, false);
+        Debug.Log("Left Grabbed");
+    }
+    private void OnGrabObject_Right(InputAction.CallbackContext con)
+    {
+        TryGrab(rightHand, true);
+        Debug.Log("Right Grabbed");
+    }
+
+    private void OnReleaseObject_Left(InputAction.CallbackContext con)
+    {
+        Debug.Log("Left Canceled");
+
+        if (leftGrabbedObject != null)
+        {
+            leftGrabbedObject.transform.SetParent(null);
+            leftGrabbedObject.GetComponent<Rigidbody>().isKinematic = false;
+            leftGrabbedObject = null;
+            Debug.Log("Left Released");
+        }
+    }
+    private void OnReleaseObject_Right(InputAction.CallbackContext con)
+    {
+        Debug.Log("Right Canceled");
+
+        if (rightGrabbedObject != null)
+        {
+            rightGrabbedObject.transform.SetParent(null);
+            rightGrabbedObject.GetComponent<Rigidbody>().isKinematic = false;
+            rightGrabbedObject = null;
+            Debug.Log("Right Released");
         }
     }
 
-    private void TryGrab(OVRHand hand, OVRGrabbable grabObj)
+    private void TryGrab(OVRHand hand, bool grabObjisRight)
     {
         Collider[] colliders = Physics.OverlapSphere(hand.PointerPose.position, 0.05f);
 
+
         foreach (var collider in colliders)
         {
-            if (collider.TryGetComponent(out OVRGrabbable grabbable))
+            if (collider.gameObject.TryGetComponent(out OVRGrabbable grabbable))
             {
-                grabObj = grabbable;
-                grabObj.transform.SetParent(hand.transform);
-                grabObj.GetComponent<Rigidbody>().isKinematic = true;
+                if (grabObjisRight)
+                {
+                    rightGrabbedObject = grabbable;
+                    rightGrabbedObject.transform.SetParent(hand.transform);
+                    rightGrabbedObject.GetComponent<Rigidbody>().isKinematic = true;
+                }
+                else
+                {
+                    leftGrabbedObject = grabbable;
+                    leftGrabbedObject.transform.SetParent(hand.transform);
+                    leftGrabbedObject.GetComponent<Rigidbody>().isKinematic = true;
+                }
+
                 break;
             }
         }
@@ -103,33 +196,61 @@ public class HandTrackingGrab : MonoBehaviour
             grabObj.GetComponent<Rigidbody>().isKinematic = false;
         }
     }
-}
 
-
-/*
-
-view - model << 얘가 계속 바껴야 한다면?
-UI가 매니저의 참조를 갖고있으니까.
-
-_Character = 매니저.캐릭터주세요(A캐릭터);
-결과 : _Character = A캐릭터;
-
-public Character 캐릭터주세요(string 캐릭터이름)
-{
-    foreach(캐릭터 c in 캐릭터 목록)
+    private void MoveGrabbableObject()
     {
-        if(c.이름 == 캐릭터이름)
-        return c;
+        if (leftGrabbedObject != null)
+        {
+            leftGrabbedObject.transform.position = new Vector3(leftHand.transform.position.x, leftHand.transform.position.y, 0);
+        }
+        if (rightGrabbedObject != null)
+        {
+            rightGrabbedObject.transform.position = new Vector3(rightHand.transform.position.x, rightHand.transform.position.y, 0);
+        }
+    }
+    private void OnDrawGizmos()
+    {
+        Gizmos.DrawSphere(leftHand.PointerPose.position, 2f);
+        Gizmos.DrawSphere(rightHand.PointerPose.position, 2f);
     }
 }
 
 
-Model = 연산
-ViewModel = 전달
-View = 대응
+
+/*
+ 
+ 
+ 반복 - 조건(미리 정할 것), 반복할 행동.Action()
+
+CodeBlock _block;
+
+void 반복문(CodeBlock block)
+{
+    
+    while(조건)
+    {
+        block.Action();
+    }
+}
 
 
-매개로 캐릭터 이름이 전달해서
-매니저가 그 캐릭터 이름을 반환을 하고?
-반환된 캐릭터를 내가 참조를 걸고있는 캐릭터에 대입.
-*/
+조건 - 조건(미리 정해지는 것), 조건 충족시 수행할 행동
+
+void 조건문(Func<bool> 조건, Action 수행할 행동)
+{
+    if(조건)
+    {
+        수행할행동.Invoke();
+    }
+}
+
+플레이어
+OnTriggerEnter(Collision other)
+{
+    if(other.TryGetComponent(out Monster mon)
+    {
+        mon
+    }
+}
+
+ */

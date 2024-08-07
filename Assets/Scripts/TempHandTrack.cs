@@ -217,7 +217,7 @@ public class HandTrackingGrab : MonoBehaviour
 
 
 
-/*
+/* 조건 반복 블록 구상
  
  
  반복 - 조건(미리 정할 것), 반복할 행동.Action()
@@ -253,4 +253,55 @@ OnTriggerEnter(Collision other)
     }
 }
 
+ */
+
+
+/* 코드블럭 콘테이너 등록 예시
+class 코드블럭 
+{
+    블럭컨테이너 con;
+        
+    void OnEnable()
+    {
+        핸드트래커.Intance.OnRelease += OnRelease_CheckContatiner;
+    }
+
+    void OnRelease_CheckContainer()
+    {
+        if(con!=null)
+            con.블럭생성();
+    }
+
+    OnTriggerEnter(collider col)
+    {
+        if(col.TryGetComponent(out 블럭컨테이너 con)
+        {
+            con = this.con;
+        }
+    }
+
+    (Exit은 반대로 할당해제 con = null;)
+}
+---------------------------------------------------------
+class 블럭컨테이너 
+{
+    public void 블럭생성(코드블럭 block)
+    {
+        Instantiate(block.gameObject);
+    }
+}
+---------------------------------------------------------
+class 핸드트래커 : 싱글톤
+{
+    코드블럭 들고있는블럭;
+
+    public event void OnRelease;
+    
+    void 놓는기능()
+    {
+        놓는 로직();
+        OnRelease.Invoke();
+    }
+}
+ 
  */

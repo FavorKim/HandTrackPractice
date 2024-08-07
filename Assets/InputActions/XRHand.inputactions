@@ -1,0 +1,76 @@
+{
+    "name": "XRHand",
+    "maps": [
+        {
+            "name": "Hand",
+            "id": "53f0df57-aa42-40fa-b65a-3a7a34975813",
+            "actions": [
+                {
+                    "name": "LeftGrap",
+                    "type": "Button",
+                    "id": "b9dcfd93-687f-4201-a12a-d5401ead7879",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "RightGrap",
+                    "type": "Button",
+                    "id": "94f8c8c2-c211-4d60-9870-9568fa331b53",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "6d9e5009-ff81-405a-8665-8b183f015502",
+                    "path": "<XRController>{LeftHand}/{TriggerButton}",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "LeftGrap",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "7bdaab5f-3bad-4a5b-ad7b-02162269be04",
+                    "path": "<Keyboard>/q",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "LeftGrap",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "976ea389-2ecf-49f6-ba0a-8a53a39aad70",
+                    "path": "<XRController>{RightHand}/{TriggerButton}",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "RightGrap",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "6e23d963-4cad-4a7b-95ce-220f75a266ae",
+                    "path": "<Keyboard>/e",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "RightGrap",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        }
+    ],
+    "controlSchemes": []
+}

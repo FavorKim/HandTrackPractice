@@ -9,6 +9,9 @@ public class HandTrackingGrab : MonoBehaviour
     [SerializeField] private OVRGrabbable rightGrabbedObject;
     [SerializeField] private OVRGrabbable leftGrabbedObject;
 
+    [SerializeField] private Transform leftIndexFinger;
+    [SerializeField] private Transform rightIndexFinger;
+
     public InputActionReference rightGrapInput;
     public InputActionReference leftGrapInput;
 
@@ -74,15 +77,15 @@ public class HandTrackingGrab : MonoBehaviour
 
     void Update()
     {
-        MoveHand(leftHand, KeyCode.W, KeyCode.S, KeyCode.A, KeyCode.D);
-        MoveHand(rightHand, KeyCode.UpArrow, KeyCode.DownArrow, KeyCode.LeftArrow, KeyCode.RightArrow);
+        MoveHand(leftHand, leftIndexFinger, KeyCode.W, KeyCode.S, KeyCode.A, KeyCode.D);
+        MoveHand(rightHand, rightIndexFinger, KeyCode.UpArrow, KeyCode.DownArrow, KeyCode.LeftArrow, KeyCode.RightArrow);
         MoveGrabbableObject();
-        
+
 
     }
 
 
-    private void MoveHand(OVRHand hand, KeyCode up, KeyCode down, KeyCode left, KeyCode right)
+    private void MoveHand(OVRHand hand, Transform indexFinger, KeyCode up, KeyCode down, KeyCode left, KeyCode right)
     {
         Vector3 movement = Vector3.zero;
 
@@ -105,6 +108,7 @@ public class HandTrackingGrab : MonoBehaviour
 
         hand.transform.Translate(movement * moveSpeed * Time.deltaTime);
 
+        TryPoke(indexFinger);
         /*
         if (isGrabbing)
         {
@@ -187,6 +191,22 @@ public class HandTrackingGrab : MonoBehaviour
         }
     }
 
+    private void TryPoke(Transform indexFinger)
+    {
+
+
+        Collider[] indexColliders = Physics.OverlapSphere(indexFinger.position, 0.01f);
+
+        foreach (var collider in indexColliders)
+        {
+            if (collider.CompareTag("Pokeable"))
+            {
+                Debug.Log("Index finger poked " + collider.name);
+            }
+        }
+
+    }
+
     private void Release(bool isLeft)
     {
         var grabObj = isLeft ? leftGrabbedObject : rightGrabbedObject;
@@ -208,11 +228,7 @@ public class HandTrackingGrab : MonoBehaviour
             rightGrabbedObject.transform.position = new Vector3(rightHand.transform.position.x, rightHand.transform.position.y, 0);
         }
     }
-    private void OnDrawGizmos()
-    {
-        Gizmos.DrawSphere(leftHand.PointerPose.position, 2f);
-        Gizmos.DrawSphere(rightHand.PointerPose.position, 2f);
-    }
+
 }
 
 
